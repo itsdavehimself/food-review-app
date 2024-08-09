@@ -2,49 +2,153 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import User from '../models/userModel';
-import UserDocument from '../documents/userDocument';
+import bcrypt from 'bcrypt';
+import { JwtPayload } from 'jsonwebtoken';
 
 dotenv.config();
 
-const jwtSecret: string = process.env.JWT_SECRET || '';
+const getSecrets = () => {
+	const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
+	const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
 
-if (jwtSecret === '') {
-	console.error(
-		'JWT_SECRET environment variable is not set. Ensure it is set before running the application.'
+	if (!accessTokenSecret) {
+		throw new Error('ACCESS_TOKEN_SECRET is not defined');
+	}
+	if (!refreshTokenSecret) {
+		throw new Error('REFRESH_TOKEN_SECRET is not defined');
+	}
+
+	return { accessTokenSecret, refreshTokenSecret };
+};
+
+const generateTokens = (username: string) => {
+	const { accessTokenSecret, refreshTokenSecret } = getSecrets();
+
+	const accessToken = jwt.sign(
+		{
+			UserInfo: { username },
+		},
+		accessTokenSecret,
+		{ expiresIn: '10s' }
 	);
-	process.exit(1);
-}
 
-const createToken = (_id: string): string => {
-	return jwt.sign({ _id }, jwtSecret, { expiresIn: '7d' });
+	const refreshToken = jwt.sign({ username }, refreshTokenSecret, {
+		expiresIn: '7d',
+	});
+
+	return { accessToken, refreshToken };
+};
+
+const setCookie = (res: Response, refreshToken: string) => {
+	res.cookie('jwt', refreshToken, {
+		httpOnly: true,
+		secure: process.env.NODE_ENV === 'production',
+		sameSite: 'none',
+		maxAge: 7 * 24 * 60 * 60 * 1000,
+	});
 };
 
 //Login User
-const loginUser = async (req: Request, res: Response): Promise<void> => {
-	const { email, password } = req.body;
-
+const loginUser = async (req: Request, res: Response): Promise<Response> => {
 	try {
-		const user: UserDocument = await User.login(email, password);
-		const token = createToken(user._id);
+		const { email, password } = req.body;
 
-		res.status(200).json({ email, token });
-	} catch (error: any) {
-		res.status(400).json({ error: error.message });
+		if (!email || !password) {
+			return res.status(400).json({ message: 'All fields are required' });
+		}
+
+		const user = await User.findOne({ email });
+
+		if (!user || !(await bcrypt.compare(password, user.password))) {
+			return res
+				.status(401)
+				.json({ message: 'Email or password is incorrect' });
+		}
+
+		const { accessToken, refreshToken } = generateTokens(user.username);
+		setCookie(res, refreshToken);
+
+		return res.status(200).json({ accessToken });
+	} catch (error) {
+		return res.status(500).json({ message: 'Internal server error' });
 	}
 };
 
 //Sign Up User
 const signUpUser = async (req: Request, res: Response): Promise<void> => {
-	const { email, password } = req.body;
 	try {
-		const user: UserDocument = await User.signup(email, password);
+		const { email, password } = req.body;
 
-		const token = createToken(user._id);
+		if (!email || !password) {
+			throw Error('All fields are required.');
+		}
 
-		res.status(200).json({ user, token });
+		if (await User.findOne({ email })) {
+			throw Error('Email already in use.');
+		}
+
+		const salt = await bcrypt.genSalt(10);
+		const hash = await bcrypt.hash(password, salt);
+
+		const user = await User.create({
+			email,
+			password: hash,
+		});
+
+		const { accessToken, refreshToken } = generateTokens(user.username);
+		setCookie(res, refreshToken);
+
+		res.status(200).json({ accessToken });
 	} catch (error: any) {
 		res.status(400).json({ error: error.message });
 	}
 };
 
-export { loginUser, signUpUser };
+const refresh = (req: Request, res: Response): void => {
+	const cookies = req.cookies;
+
+	if (!cookies?.jwt) {
+		res.status(401).json({ message: 'Unauthorized' });
+	}
+
+	const { accessTokenSecret, refreshTokenSecret } = getSecrets();
+
+	jwt.verify(
+		cookies.jwt,
+		refreshTokenSecret,
+		async (err: any, decoded: JwtPayload | string | undefined) => {
+			if (err || !decoded || typeof decoded === 'string') {
+				return res.status(403).json({ message: 'Forbidden' });
+			}
+
+			const user = await User.findOne({
+				username: (decoded as JwtPayload).username,
+			});
+			if (!user) return res.status(401).json({ message: 'Unauthorized' });
+
+			const accessToken = jwt.sign(
+				{
+					UserInfo: {
+						username: user.username,
+					},
+				},
+				accessTokenSecret,
+				{ expiresIn: '10s' }
+			);
+
+			res.json({ accessToken });
+		}
+	);
+};
+
+const logoutUser = async (req: Request, res: Response): Promise<void> => {
+	const cookies = req.cookies;
+	if (!cookies?.jwt) {
+		res.sendStatus(204);
+	}
+
+	res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true });
+	res.json({ message: 'Cookie cleared' });
+};
+
+export { loginUser, signUpUser, refresh, logoutUser };
