@@ -21,12 +21,12 @@ const getSecrets = () => {
 	return { accessTokenSecret, refreshTokenSecret };
 };
 
-const generateTokens = (username: string) => {
+const generateTokens = (username: string, sub: string, email: string) => {
 	const { accessTokenSecret, refreshTokenSecret } = getSecrets();
 
 	const accessToken = jwt.sign(
 		{
-			UserInfo: { username },
+			UserInfo: { username, sub, email },
 		},
 		accessTokenSecret,
 		{ expiresIn: '10s' }
@@ -65,7 +65,11 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
 				.json({ message: 'Email or password is incorrect' });
 		}
 
-		const { accessToken, refreshToken } = generateTokens(user.username);
+		const { accessToken, refreshToken } = generateTokens(
+			user.username,
+			user._id,
+			user.email
+		);
 		setCookie(res, refreshToken);
 
 		return res.status(200).json({ accessToken });
@@ -95,7 +99,11 @@ const signUpUser = async (req: Request, res: Response): Promise<void> => {
 			password: hash,
 		});
 
-		const { accessToken, refreshToken } = generateTokens(user.username);
+		const { accessToken, refreshToken } = generateTokens(
+			user.username,
+			user._id,
+			user.email
+		);
 		setCookie(res, refreshToken);
 
 		res.status(200).json({ accessToken });
@@ -130,6 +138,8 @@ const refresh = (req: Request, res: Response): void => {
 				{
 					UserInfo: {
 						username: user.username,
+						sub: user._id,
+						email: user.email,
 					},
 				},
 				accessTokenSecret,
