@@ -21,12 +21,17 @@ const getSecrets = () => {
 	return { accessTokenSecret, refreshTokenSecret };
 };
 
-const generateTokens = (username: string, sub: string, email: string) => {
+const generateTokens = (
+	username: string,
+	sub: string,
+	email: string,
+	displayName: string
+) => {
 	const { accessTokenSecret, refreshTokenSecret } = getSecrets();
 
 	const accessToken = jwt.sign(
 		{
-			UserInfo: { username, sub, email },
+			UserInfo: { username, sub, email, displayName },
 		},
 		accessTokenSecret,
 		{ expiresIn: '10s' }
@@ -51,13 +56,17 @@ const setCookie = (res: Response, refreshToken: string) => {
 //Login User
 const loginUser = async (req: Request, res: Response): Promise<Response> => {
 	try {
-		const { email, password } = req.body;
+		const { identifier, password } = req.body;
 
-		if (!email || !password) {
+		if (!identifier || !password) {
 			return res.status(400).json({ message: 'All fields are required' });
 		}
 
-		const user = await User.findOne({ email });
+		const query = identifier.includes('@')
+			? { email: identifier }
+			: { username: identifier };
+
+		const user = await User.findOne(query);
 
 		if (!user || !(await bcrypt.compare(password, user.password))) {
 			return res
@@ -67,6 +76,7 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
 
 		const { accessToken, refreshToken } = generateTokens(
 			user.username,
+			user.displayName,
 			user._id,
 			user.email
 		);
@@ -78,17 +88,35 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
 	}
 };
 
+//Check Email Only
+const checkEmail = async (req: Request, res: Response) => {
+	try {
+		const { email } = req.body;
+
+		if (!email) {
+			return res.status(400).json({ message: 'Email is required' });
+		}
+
+		const user = await User.findOne({ email });
+
+		if (user) {
+			return res.status(409).json({ message: 'unavailable' });
+		}
+
+		return res.status(200).json({ message: 'available' });
+	} catch (error: any) {
+		console.error('Error checking email:', error);
+		return res.status(500).json({ message: 'Internal server error' });
+	}
+};
+
 //Sign Up User
 const signUpUser = async (req: Request, res: Response): Promise<void> => {
 	try {
-		const { email, password } = req.body;
+		const { email, password, username, displayName } = req.body;
 
-		if (!email || !password) {
+		if (!email || !password || !username || !displayName) {
 			throw Error('All fields are required.');
-		}
-
-		if (await User.findOne({ email })) {
-			throw Error('Email already in use.');
 		}
 
 		const salt = await bcrypt.genSalt(10);
@@ -96,11 +124,14 @@ const signUpUser = async (req: Request, res: Response): Promise<void> => {
 
 		const user = await User.create({
 			email,
+			displayName,
+			username,
 			password: hash,
 		});
 
 		const { accessToken, refreshToken } = generateTokens(
 			user.username,
+			user.displayName,
 			user._id,
 			user.email
 		);
@@ -161,4 +192,4 @@ const logoutUser = async (req: Request, res: Response): Promise<void> => {
 	res.json({ message: 'Cookie cleared' });
 };
 
-export { loginUser, signUpUser, refresh, logoutUser };
+export { loginUser, checkEmail, signUpUser, refresh, logoutUser };

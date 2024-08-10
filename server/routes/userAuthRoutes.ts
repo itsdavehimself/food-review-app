@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+	checkEmail,
 	loginUser,
 	logoutUser,
 	refresh,
@@ -10,6 +11,9 @@ const userAuthRouter = express.Router();
 
 // Login Route
 userAuthRouter.post('/login', loginUser);
+
+// Check Email Route
+userAuthRouter.post('/email', checkEmail);
 
 // Sign Up Route
 userAuthRouter.post('/signup', signUpUser);
