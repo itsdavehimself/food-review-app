@@ -1,10 +1,13 @@
+import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { JwtPayload } from 'jsonwebtoken';
-import { Request, Response, NextFunction } from 'express';
 
 interface UserRequest extends Request {
-	user: {
+	UserInfo?: {
+		email: string;
+		sub: string;
 		username: string;
+		displayName: string;
 	};
 }
 
@@ -22,16 +25,20 @@ const verifyJWT = (req: UserRequest, res: Response, next: NextFunction) => {
 
 	const token = authHeader.split(' ')[1];
 
-	jwt.verify(
-		token,
-		accessTokenSecret,
-		(err: any, decoded: JwtPayload | string | undefined) => {
-			if (err) return res.status(403).json({ message: 'Forbidden' });
+	jwt.verify(token, accessTokenSecret, (err, decoded) => {
+		if (err) return res.status(403).json({ message: 'Forbidden' });
 
-			req.user = (decoded as JwtPayload).username;
-			next();
+		if (decoded && typeof decoded !== 'string') {
+			req.UserInfo = {
+				email: (decoded as JwtPayload).email as string,
+				sub: (decoded as JwtPayload).sub as string,
+				username: (decoded as JwtPayload).username as string,
+				displayName: (decoded as JwtPayload).displayName as string,
+			};
 		}
-	);
+
+		next();
+	});
 };
 
 export default verifyJWT;
