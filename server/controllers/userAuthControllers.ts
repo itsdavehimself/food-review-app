@@ -22,23 +22,23 @@ const getSecrets = () => {
 };
 
 const generateTokens = (
-	username: string,
-	sub: string,
 	email: string,
-	displayName: string
+	username: string,
+	displayName: string,
+	sub: string
 ) => {
 	const { accessTokenSecret, refreshTokenSecret } = getSecrets();
 
 	const accessToken = jwt.sign(
 		{
-			UserInfo: { username, sub, email, displayName },
+			UserInfo: { email, username, displayName, sub },
 		},
 		accessTokenSecret,
 		{ expiresIn: '10s' }
 	);
 
 	const refreshToken = jwt.sign({ username }, refreshTokenSecret, {
-		expiresIn: '7d',
+		expiresIn: '30d',
 	});
 
 	return { accessToken, refreshToken };
@@ -50,6 +50,7 @@ const setCookie = (res: Response, refreshToken: string) => {
 		secure: process.env.NODE_ENV === 'production',
 		sameSite: 'none',
 		maxAge: 7 * 24 * 60 * 60 * 1000,
+		path: '/',
 	});
 };
 
@@ -75,10 +76,10 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
 		}
 
 		const { accessToken, refreshToken } = generateTokens(
+			user.email,
 			user.username,
 			user.displayName,
-			user._id,
-			user.email
+			user._id
 		);
 		setCookie(res, refreshToken);
 
@@ -130,10 +131,10 @@ const signUpUser = async (req: Request, res: Response): Promise<void> => {
 		});
 
 		const { accessToken, refreshToken } = generateTokens(
+			user.email,
 			user.username,
 			user.displayName,
-			user._id,
-			user.email
+			user._id
 		);
 		setCookie(res, refreshToken);
 
@@ -143,11 +144,11 @@ const signUpUser = async (req: Request, res: Response): Promise<void> => {
 	}
 };
 
-const refresh = (req: Request, res: Response): void => {
+const refresh = (req: Request, res: Response) => {
 	const cookies = req.cookies;
 
 	if (!cookies?.jwt) {
-		res.status(401).json({ message: 'Unauthorized' });
+		return res.status(401).json({ message: 'Unauthorized' });
 	}
 
 	const { accessTokenSecret, refreshTokenSecret } = getSecrets();
@@ -171,13 +172,14 @@ const refresh = (req: Request, res: Response): void => {
 						username: user.username,
 						sub: user._id,
 						email: user.email,
+						displayName: user.displayName,
 					},
 				},
 				accessTokenSecret,
 				{ expiresIn: '10s' }
 			);
 
-			res.json({ accessToken });
+			return res.json({ accessToken });
 		}
 	);
 };
