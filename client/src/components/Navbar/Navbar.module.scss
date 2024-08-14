@@ -1,0 +1,21 @@
+.navbar {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	position: fixed;
+	bottom: 0%;
+	height: 3.2rem;
+	width: 100dvw;
+	border-top: 0.5px solid rgb(199, 199, 199);
+}
+
+.nav-btn {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+	padding: 0 2rem;
+	border: none;
+	font-size: 1.4rem;
+	background-color: transparent;
+}
