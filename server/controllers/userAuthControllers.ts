@@ -34,7 +34,7 @@ const generateTokens = (
 			UserInfo: { email, username, displayName, sub },
 		},
 		accessTokenSecret,
-		{ expiresIn: '10s' }
+		{ expiresIn: '10m' }
 	);
 
 	const refreshToken = jwt.sign({ username }, refreshTokenSecret, {
@@ -176,7 +176,7 @@ const refresh = (req: Request, res: Response) => {
 					},
 				},
 				accessTokenSecret,
-				{ expiresIn: '10s' }
+				{ expiresIn: '10m' }
 			);
 
 			return res.json({ accessToken });
