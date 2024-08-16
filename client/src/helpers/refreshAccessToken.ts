@@ -11,10 +11,9 @@ const refreshAccessToken = async () => {
 			Cookies.set('accessToken', data.accessToken);
 			return data.accessToken;
 		} else {
-			throw new Error(data.message || 'Failed to refresh token');
+			return null;
 		}
 	} catch (error) {
-		console.error('Token refresh error:', error);
 		Cookies.remove('accessToken');
 		return null;
 	}

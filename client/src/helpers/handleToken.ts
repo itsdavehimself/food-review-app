@@ -10,7 +10,6 @@ const handleToken = async (token: string | undefined, dispatch: any) => {
 		const decodedToken = jwtDecode<UserInfoPayload>(token);
 		dispatch(login(decodedToken.UserInfo));
 	} catch (error: any) {
-		console.error('Failed to decode or refresh token', error);
 		const newToken = await refreshAccessToken();
 
 		if (newToken) {
