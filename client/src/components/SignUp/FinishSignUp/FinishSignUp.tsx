@@ -46,6 +46,7 @@ const FinishSignUp: React.FC<FinishSignUpProps> = ({ email }) => {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({ email, password, username, displayName }),
+				credentials: 'include',
 			}
 		);
 
