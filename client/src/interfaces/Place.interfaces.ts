@@ -1,4 +1,5 @@
 export interface Place {
+	id: string;
 	displayName: {
 		text: string;
 	};
