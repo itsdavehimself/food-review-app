@@ -1,12 +1,9 @@
 import refreshAccessToken from './refreshAccessToken';
-import { useAppDispatch } from '../app/hooks';
 import { jwtDecode } from 'jwt-decode';
 import { UserInfoPayload } from '../components/Login/Login';
 import { login, logout } from '../app/slices/userSlice';
 
-const dispatch = useAppDispatch();
-
-const handleToken = async (token: string | undefined) => {
+const handleToken = async (token: string | undefined, dispatch: any) => {
 	try {
 		if (!token) throw new Error('No token provided');
 
