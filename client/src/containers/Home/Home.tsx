@@ -1,4 +1,3 @@
-import styles from './Dashboard.module.scss';
 import { useAppSelector, useAppDispatch } from '../../app/hooks';
 import Cookies from 'js-cookie';
 import { logout } from '../../app/slices/userSlice';
@@ -7,7 +6,14 @@ const Dashboard: React.FC = () => {
 	const state = useAppSelector((state) => state.user);
 	const dispatch = useAppDispatch();
 
-	const handleLogout = (): void => {
+	const handleLogout = async (): Promise<void> => {
+		await fetch('http://localhost:3000/api/auth/logout', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			credentials: 'include',
+		});
 		dispatch(logout());
 		Cookies.remove('accessToken');
 	};
