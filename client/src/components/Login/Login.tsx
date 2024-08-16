@@ -39,6 +39,7 @@ const Login: React.FC = () => {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({ identifier, password }),
+			credentials: 'include',
 		});
 
 		const loginData = await loginResponse.json();
@@ -48,7 +49,7 @@ const Login: React.FC = () => {
 		if (accessToken) {
 			const decodedToken = jwtDecode(accessToken) as UserInfoPayload;
 			dispatch(login(decodedToken.UserInfo));
-			navigate('/dashboard');
+			navigate('/');
 		} else {
 			throw new Error('No access tokens found');
 		}
