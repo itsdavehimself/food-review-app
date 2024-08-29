@@ -20,6 +20,7 @@ import {
 	fetchPlacesStart,
 	fetchPlacesSuccess,
 } from './app/slices/placesSlice';
+import Restaurant from './containers/Restaurant/Restaurant';
 
 function App() {
 	const dispatch = useAppDispatch();
@@ -112,6 +113,12 @@ function App() {
 						<Route
 							path="/:username"
 							element={user.username ? <Profile /> : <Navigate to="/login" />}
+						/>
+						<Route
+							path="/restaurant/:placeId"
+							element={
+								user.username ? <Restaurant /> : <Navigate to="/login" />
+							}
 						/>
 					</Route>
 				</Routes>
