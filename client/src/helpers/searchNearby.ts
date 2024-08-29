@@ -1,5 +1,9 @@
 async function searchNearby(latitude: number, longitude: number) {
-	const apiKey = 'AIzaSyDSF4KK43ZEU0Zsq7je2GVhg6iekuyMs68';
+	const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+
+	if (!apiKey) {
+		throw new Error('GOOGLE_API_KEY is not defined');
+	}
 
 	const url = 'https://places.googleapis.com/v1/places:searchNearby';
 	const headers = {
