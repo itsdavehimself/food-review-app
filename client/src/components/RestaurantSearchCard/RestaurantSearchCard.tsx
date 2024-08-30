@@ -1,29 +1,19 @@
 import styles from './RestaurantSearchCard.module.scss';
+import { removeCountryAndZip } from '../../helpers/removeCountryAndZip';
 
 interface RestaurantSearchCardProps {
-	id: string;
 	name: string;
 	address: string;
+	onClick: () => void;
 }
 
-const removeCountryAndZip = (address: string): string => {
-	const parts = address.split(',');
-	parts.pop();
-	const [street, ...cityStateZipParts] = parts;
-	const cityStateZip = cityStateZipParts
-		.join(',')
-		.replace(/\d{5}(-\d{4})?$/, '')
-		.trim();
-	return `${street.trim()}, ${cityStateZip}`;
-};
-
 const RestaurantSearchCard: React.FC<RestaurantSearchCardProps> = ({
-	id,
 	name,
 	address,
+	onClick,
 }) => {
 	return (
-		<div className={styles['restaurant-card']}>
+		<div className={styles['restaurant-card']} onClick={onClick}>
 			<h3>{name}</h3>
 			<p>{removeCountryAndZip(address)}</p>
 		</div>
