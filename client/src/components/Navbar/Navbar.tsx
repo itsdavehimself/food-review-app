@@ -41,7 +41,7 @@ const Navbar: React.FC = () => {
 				</button>
 				<button
 					className={styles['nav-btn']}
-					onClick={() => handleClick(`${user.username}`)}
+					onClick={() => handleClick(`user/${user.username}`)}
 				>
 					{userIcon}
 				</button>
