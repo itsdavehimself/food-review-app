@@ -1,41 +1,21 @@
 import styles from './Explore.module.scss';
 import Searchbar from '../../components/Searchbar/Searchbar';
-import RestaurantSearchCard from '../../components/RestaurantSearchCard/RestaurantSearchCard';
 import { useAppSelector } from '../../app/hooks';
-import { useNavigate } from 'react-router-dom';
-import { Place } from '../../interfaces/Place.interfaces';
+import SearchResults from '../../components/SearchResults/SearchResults';
+import NearbyResults from '../../components/NearbyResults/NearbyResults';
 
 const Explore: React.FC = () => {
-	const places = useAppSelector((state) => state.places.places);
-	const isLoading = useAppSelector((state) => state.places.status);
-	const navigate = useNavigate();
-
-	const handleClick = (place: Place) => {
-		navigate(`/restaurant/${place.id}`);
-	};
+	const isLoadingSearch = useAppSelector((state) => state.search.status);
+	const searchResults = useAppSelector((state) => state.search.places);
 
 	return (
-		<>
+		<div className={styles['explore']}>
 			<Searchbar />
-			<div className={styles['search-results']}>
-				<h2>Popular Spots Near You</h2>
-				{isLoading === 'succeeded' ? (
-					<>
-						{places &&
-							places.map((place) => (
-								<RestaurantSearchCard
-									key={place.id}
-									name={place.displayName.text}
-									address={place.formattedAddress}
-									onClick={() => handleClick(place)}
-								/>
-							))}
-					</>
-				) : (
-					<div>Loading...</div>
-				)}
+			<div className={styles['results-container']}>
+				{searchResults.length > 0 && <SearchResults />}
+				{isLoadingSearch !== 'succeeded' && <NearbyResults />}
 			</div>
-		</>
+		</div>
 	);
 };
 

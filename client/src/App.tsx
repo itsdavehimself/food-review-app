@@ -21,8 +21,10 @@ import {
 	fetchPlacesSuccess,
 } from './app/slices/placesSlice';
 import Restaurant from './containers/Restaurant/Restaurant';
+import { LoadScript } from '@react-google-maps/api';
 
 function App() {
+	const mapsApiKey = import.meta.env.VITE_GOOGLE_API_KEY;
 	const dispatch = useAppDispatch();
 	const token = Cookies.get('accessToken');
 	const user = useAppSelector((state) => state.user);
@@ -83,46 +85,50 @@ function App() {
 
 	return (
 		<div className="App">
-			<BrowserRouter>
-				<Routes>
-					<Route>
-						<Route element={<WithoutNav />}>
+			<LoadScript googleMapsApiKey={mapsApiKey} libraries={['places']}>
+				<BrowserRouter>
+					<Routes>
+						<Route>
+							<Route element={<WithoutNav />}>
+								<Route
+									path="/signup"
+									element={!user.username ? <SignUp /> : <Navigate to="/" />}
+								/>
+								<Route
+									path="/login"
+									element={!user.username ? <Login /> : <Navigate to="/" />}
+								/>
+							</Route>
+						</Route>
+						<Route element={<WithNav />}>
 							<Route
-								path="/signup"
-								element={!user.username ? <SignUp /> : <Navigate to="/" />}
+								path="/"
+								element={
+									user.username ? <Dashboard /> : <Navigate to="/login" />
+								}
 							/>
 							<Route
-								path="/login"
-								element={!user.username ? <Login /> : <Navigate to="/" />}
+								path="/map"
+								element={user.username ? <Map /> : <Navigate to="/login" />}
+							/>
+							<Route
+								path="/explore"
+								element={user.username ? <Explore /> : <Navigate to="/login" />}
+							/>
+							<Route
+								path="/user/:username"
+								element={user.username ? <Profile /> : <Navigate to="/login" />}
+							/>
+							<Route
+								path="/restaurant/:placeId"
+								element={
+									user.username ? <Restaurant /> : <Navigate to="/login" />
+								}
 							/>
 						</Route>
-					</Route>
-					<Route element={<WithNav />}>
-						<Route
-							path="/"
-							element={user.username ? <Dashboard /> : <Navigate to="/login" />}
-						/>
-						<Route
-							path="/map"
-							element={user.username ? <Map /> : <Navigate to="/login" />}
-						/>
-						<Route
-							path="/explore"
-							element={user.username ? <Explore /> : <Navigate to="/login" />}
-						/>
-						<Route
-							path="/user/:username"
-							element={user.username ? <Profile /> : <Navigate to="/login" />}
-						/>
-						<Route
-							path="/restaurant/:placeId"
-							element={
-								user.username ? <Restaurant /> : <Navigate to="/login" />
-							}
-						/>
-					</Route>
-				</Routes>
-			</BrowserRouter>
+					</Routes>
+				</BrowserRouter>
+			</LoadScript>
 		</div>
 	);
 }

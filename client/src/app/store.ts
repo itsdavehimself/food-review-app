@@ -2,12 +2,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import userReducer from './slices/userSlice';
 import placesSlice from './slices/placesSlice';
 import locationSlice from './slices/locationSlice';
+import searchSlice from './slices/searchSlice';
 
 export const store = configureStore({
 	reducer: {
 		user: userReducer,
 		places: placesSlice,
 		location: locationSlice,
+		search: searchSlice,
 	},
 });
 

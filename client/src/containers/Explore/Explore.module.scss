@@ -1,3 +1,9 @@
-.search-results {
-	padding-top: 4rem;
+.explore {
+	height: 100dvh;
+}
+
+.results-container {
+	overflow-y: auto;
+	top: 0;
+	height: calc(100% - 8.5rem);
 }
