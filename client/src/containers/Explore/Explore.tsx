@@ -13,7 +13,9 @@ const Explore: React.FC = () => {
 			<Searchbar />
 			<div className={styles['results-container']}>
 				{searchResults.length > 0 && <SearchResults />}
-				{isLoadingSearch !== 'succeeded' && <NearbyResults />}
+				{isLoadingSearch !== 'succeeded' && isLoadingSearch !== 'loading' && (
+					<NearbyResults />
+				)}
 			</div>
 		</div>
 	);

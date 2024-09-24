@@ -63,7 +63,7 @@ const Searchbar: React.FC = () => {
 			>
 				Search
 			</button>
-			{isLoadingSearch === 'succeeded' && (
+			{isLoadingSearch !== 'idle' && (
 				<button onClick={(e) => clickClear(e)}>Nearby spots</button>
 			)}
 		</form>
