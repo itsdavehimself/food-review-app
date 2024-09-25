@@ -7,14 +7,52 @@ const handleToken = async (token: string | undefined, dispatch: any) => {
 	try {
 		if (!token) throw new Error('No token provided');
 
+		// Decode the token to get basic user info
 		const decodedToken = jwtDecode<UserInfoPayload>(token);
-		dispatch(login(decodedToken.UserInfo));
+
+		// Fetch the user's favorites from the backend (or use the existing API)
+		const response = await fetch(
+			'http://localhost:3000/api/favorites/getUserFavorites',
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			}
+		);
+
+		const data = await response.json();
+
+		// Dispatch login with the full user info, including favorites
+		dispatch(
+			login({
+				...decodedToken.UserInfo, // Spread the basic user info from the token
+				favorites: data.favorites || [], // Include the favorites from the API call
+			})
+		);
 	} catch (error: any) {
 		const newToken = await refreshAccessToken();
 
 		if (newToken) {
 			const newDecodedToken = jwtDecode<UserInfoPayload>(newToken);
-			dispatch(login(newDecodedToken.UserInfo));
+
+			// Fetch the favorites again if token was refreshed
+			const response = await fetch('http://localhost:3000/api/user/favorites', {
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${newToken}`,
+				},
+			});
+
+			const data = await response.json();
+
+			// Dispatch login with the full user info and favorites
+			dispatch(
+				login({
+					...newDecodedToken.UserInfo,
+					favorites: data.favorites || [],
+				})
+			);
 		} else {
 			dispatch(logout());
 		}

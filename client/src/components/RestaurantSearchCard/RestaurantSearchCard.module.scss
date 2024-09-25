@@ -1,4 +1,35 @@
 .restaurant-card {
-	padding: 0.5rem 1rem;
-	font-size: 1.1rem;
+	display: grid;
+	grid-template-columns: 1fr 7rem;
+	gap: 1rem;
+	justify-content: space-between;
+	padding: 0.5rem 2rem 0.5rem 1rem;
+	margin: 1rem 0;
+	font-size: 1rem;
+}
+
+.restaurant-card:hover {
+	cursor: pointer;
+}
+
+.restaurant-info {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.icons {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1.4rem;
+	font-size: 1.4rem;
+}
+
+.icon {
+	color: rgb(136, 136, 136);
+}
+
+.icon:hover {
+	cursor: pointer;
 }

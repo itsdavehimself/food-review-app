@@ -7,6 +7,8 @@ import { Place } from '../../interfaces/Place.interfaces';
 const NearbyResults: React.FC = () => {
 	const places = useAppSelector((state) => state.places.places);
 	const isLoadingNearby = useAppSelector((state) => state.places.status);
+	const favorites = useAppSelector((state) => state.user.favorites);
+
 	const navigate = useNavigate();
 
 	const restaurantCardClick = (place: Place) => {
@@ -19,14 +21,21 @@ const NearbyResults: React.FC = () => {
 			{isLoadingNearby === 'succeeded' ? (
 				<>
 					{places &&
-						places.map((place) => (
-							<RestaurantSearchCard
-								key={place.id}
-								name={place.displayName.text}
-								address={place.formattedAddress}
-								onClick={() => restaurantCardClick(place)}
-							/>
-						))}
+						places.map((place) => {
+							const isFavorited = favorites.some(
+								(favorite) => favorite.googlePlaceId === place.id
+							);
+							return (
+								<RestaurantSearchCard
+									key={place.id}
+									name={place.displayName.text}
+									address={place.formattedAddress}
+									restaurantId={place.id}
+									isFavorited={isFavorited}
+									onClick={() => restaurantCardClick(place)}
+								/>
+							);
+						})}
 				</>
 			) : (
 				<div>Loading...</div>

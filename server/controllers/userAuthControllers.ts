@@ -67,6 +67,7 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
 			? { email: identifier }
 			: { username: identifier };
 
+		// Find the user by email or username
 		const user = await User.findOne(query);
 
 		if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -75,16 +76,33 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
 				.json({ message: 'Email or password is incorrect' });
 		}
 
+		// Generate tokens (access and refresh)
 		const { accessToken, refreshToken } = generateTokens(
 			user.email,
 			user.username,
 			user.displayName,
 			user._id
 		);
+
+		// Set the refresh token in a cookie
 		setCookie(res, refreshToken);
 
-		return res.status(200).json({ accessToken });
+		const userWithPopulatedFavorites = await User.findById(user._id).populate({
+			path: 'favorites',
+			select: 'googlePlaceId',
+		});
+
+		if (!userWithPopulatedFavorites) {
+			return res
+				.status(404)
+				.json({ message: 'User not found after population' });
+		}
+		return res.status(200).json({
+			accessToken,
+			favorites: userWithPopulatedFavorites.favorites,
+		});
 	} catch (error) {
+		console.error(error);
 		return res.status(500).json({ message: 'Internal server error' });
 	}
 };

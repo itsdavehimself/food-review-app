@@ -17,6 +17,7 @@ export interface UserInfoPayload extends JwtPayload {
 		sub: string;
 		username: string;
 		displayName: string;
+		favorites: string[];
 	};
 }
 
@@ -44,11 +45,20 @@ const Login: React.FC = () => {
 
 		const loginData = await loginResponse.json();
 		const accessToken = loginData.accessToken;
+		const favorites = loginData.favorites;
 		Cookies.set('accessToken', accessToken);
 
 		if (accessToken) {
 			const decodedToken = jwtDecode(accessToken) as UserInfoPayload;
-			dispatch(login(decodedToken.UserInfo));
+			dispatch(
+				login({
+					email: decodedToken.UserInfo.email,
+					sub: decodedToken.UserInfo.sub,
+					username: decodedToken.UserInfo.username,
+					displayName: decodedToken.UserInfo.displayName,
+					favorites: favorites,
+				})
+			);
 			navigate('/');
 		} else {
 			throw new Error('No access tokens found');

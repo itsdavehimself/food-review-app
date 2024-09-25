@@ -26,6 +26,10 @@ const userSchema = new Schema<UserDocument>({
 		type: String,
 		trim: true,
 	},
+	favorites: {
+		type: [Schema.Types.ObjectId],
+		ref: 'Restaurant',
+	},
 });
 
 const User = mongoose.model<UserDocument, UserModel>('User', userSchema);

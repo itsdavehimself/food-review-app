@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { JwtPayload } from 'jsonwebtoken';
 
 interface UserRequest extends Request {
 	UserInfo?: {
@@ -8,6 +7,7 @@ interface UserRequest extends Request {
 		sub: string;
 		username: string;
 		displayName: string;
+		favorites: string[];
 	};
 }
 
@@ -15,25 +15,31 @@ const verifyJWT = (req: UserRequest, res: Response, next: NextFunction) => {
 	const authHeader = req.headers.authorization;
 	const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
 
-	if (!accessTokenSecret) {
-		throw new Error('ACCESS_TOKEN_SECRET is not defined');
+	if (!authHeader?.startsWith('Bearer ')) {
+		console.log('Authorization header is missing or malformed.');
+		return res.status(401).json({ message: 'Unauthorized' });
 	}
 
-	if (!authHeader?.startsWith('Bearer ')) {
-		return res.status(401).json({ message: 'Unauthorized' });
+	if (!accessTokenSecret) {
+		throw new Error('ACCESS_TOKEN_SECRET is not defined.');
 	}
 
 	const token = authHeader.split(' ')[1];
 
 	jwt.verify(token, accessTokenSecret, (err, decoded) => {
-		if (err) return res.status(403).json({ message: 'Forbidden' });
+		if (err) {
+			console.error('JWT verification failed:', err);
+			return res.status(403).json({ message: 'Forbidden' });
+		}
 
-		if (decoded && typeof decoded !== 'string') {
+		if (decoded && typeof decoded !== 'string' && (decoded as any).UserInfo) {
+			const userInfo = (decoded as any).UserInfo;
 			req.UserInfo = {
-				email: (decoded as JwtPayload).email as string,
-				sub: (decoded as JwtPayload).sub as string,
-				username: (decoded as JwtPayload).username as string,
-				displayName: (decoded as JwtPayload).displayName as string,
+				email: userInfo.email,
+				sub: userInfo.sub,
+				username: userInfo.username,
+				displayName: userInfo.displayName,
+				favorites: userInfo.favorites || [],
 			};
 		}
 

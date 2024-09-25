@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import userAuthRouter from './routes/userAuthRoutes';
+import favoritesRouter from './routes/favoritesRoutes';
 const port = Number(process.env.PORT) || 3000;
 
 dotenv.config();
@@ -20,6 +21,7 @@ app.use(
 
 app.use(cookieParser());
 app.use('/api/auth', userAuthRouter);
+app.use('/api/favorites', favoritesRouter);
 
 const mongoURI = process.env.MONGO_URI;
 
