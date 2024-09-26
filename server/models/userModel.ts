@@ -30,6 +30,10 @@ const userSchema = new Schema<UserDocument>({
 		type: [Schema.Types.ObjectId],
 		ref: 'Restaurant',
 	},
+	bookmarks: {
+		type: [Schema.Types.ObjectId],
+		ref: 'Restaurant',
+	},
 });
 
 const User = mongoose.model<UserDocument, UserModel>('User', userSchema);

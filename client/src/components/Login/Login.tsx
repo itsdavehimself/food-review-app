@@ -18,6 +18,7 @@ export interface UserInfoPayload extends JwtPayload {
 		username: string;
 		displayName: string;
 		favorites: string[];
+		bookmarks: string[];
 	};
 }
 
@@ -46,6 +47,7 @@ const Login: React.FC = () => {
 		const loginData = await loginResponse.json();
 		const accessToken = loginData.accessToken;
 		const favorites = loginData.favorites;
+		const bookmarks = loginData.bookmarks;
 		Cookies.set('accessToken', accessToken);
 
 		if (accessToken) {
@@ -57,6 +59,7 @@ const Login: React.FC = () => {
 					username: decodedToken.UserInfo.username,
 					displayName: decodedToken.UserInfo.displayName,
 					favorites: favorites,
+					bookmarks: bookmarks,
 				})
 			);
 			navigate('/');

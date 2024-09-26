@@ -14,22 +14,29 @@ import {
 import { toggleFavorite } from '../../helpers/toggleFavorites';
 import { useAppDispatch } from '../../app/hooks';
 import { Place } from '../../interfaces/Place.interfaces';
+import { toggleBookmark } from '../../helpers/toggleBookmarks';
 
 interface RestaurantSearchCardProps {
 	place: Place;
 	isFavorited: boolean;
+	isBookmarked: boolean;
 	onClick: () => void;
 }
 
 const RestaurantSearchCard: React.FC<RestaurantSearchCardProps> = ({
 	place,
 	isFavorited,
+	isBookmarked,
 	onClick,
 }) => {
 	const dispatch = useAppDispatch();
 
 	const handleToggleFavorite = (e: any) => {
 		toggleFavorite(e, place, dispatch);
+	};
+
+	const handleToggleBookmark = (e: any) => {
+		toggleBookmark(e, place, dispatch);
 	};
 	return (
 		<div className={styles['restaurant-card']} onClick={onClick}>
@@ -43,7 +50,11 @@ const RestaurantSearchCard: React.FC<RestaurantSearchCardProps> = ({
 					className={styles.icon}
 					onClick={handleToggleFavorite}
 				/>
-				<FontAwesomeIcon icon={faBookmark} className={styles.icon} />
+				<FontAwesomeIcon
+					icon={isBookmarked ? faBookmarkSolid : faBookmark}
+					className={styles.icon}
+					onClick={handleToggleBookmark}
+				/>
 				<FontAwesomeIcon icon={faCheckCircle} className={styles.icon} />
 			</div>
 		</div>

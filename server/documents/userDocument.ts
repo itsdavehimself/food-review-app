@@ -7,6 +7,7 @@ interface UserDocument {
 	displayName: string;
 	username: string;
 	favorites: Types.ObjectId[];
+	bookmarks: Types.ObjectId[];
 }
 
 export default UserDocument;

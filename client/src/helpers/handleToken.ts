@@ -12,7 +12,7 @@ const handleToken = async (token: string | undefined, dispatch: any) => {
 
 		// Fetch the user's favorites from the backend (or use the existing API)
 		const response = await fetch(
-			'http://localhost:3000/api/favorites/getUserFavorites',
+			'http://localhost:3000/api/savedData/getUserSavedData',
 			{
 				method: 'GET',
 				headers: {
@@ -26,8 +26,9 @@ const handleToken = async (token: string | undefined, dispatch: any) => {
 		// Dispatch login with the full user info, including favorites
 		dispatch(
 			login({
-				...decodedToken.UserInfo, // Spread the basic user info from the token
-				favorites: data.favorites || [], // Include the favorites from the API call
+				...decodedToken.UserInfo,
+				favorites: data.favorites || [],
+				bookmarks: data.bookmarks || [],
 			})
 		);
 	} catch (error: any) {
@@ -51,6 +52,7 @@ const handleToken = async (token: string | undefined, dispatch: any) => {
 				login({
 					...newDecodedToken.UserInfo,
 					favorites: data.favorites || [],
+					bookmarks: data.bookmarks || [],
 				})
 			);
 		} else {

@@ -12,7 +12,7 @@ interface UserRequest extends Request {
 	};
 }
 
-const toggleFavorite = async (req: UserRequest, res: Response) => {
+const toggleBookmark = async (req: UserRequest, res: Response) => {
 	try {
 		const userId = req.UserInfo?.sub;
 		const { place } = req.body;
@@ -34,32 +34,33 @@ const toggleFavorite = async (req: UserRequest, res: Response) => {
 			console.log('New restaurant created:', restaurant);
 		}
 
-		const isFavorite = user.favorites.some(
+		const isBookmark = user.bookmarks.some(
 			(fav) => fav.toString() === restaurant._id.toString()
 		);
 
-		if (isFavorite) {
-			user.favorites = user.favorites.filter(
+		if (isBookmark) {
+			user.bookmarks = user.bookmarks.filter(
 				(fav) => fav.toString() !== restaurant._id.toString()
 			);
 		} else {
-			user.favorites.push(restaurant._id);
+			user.bookmarks.push(restaurant._id);
 		}
 
 		await user.save();
 
-		const updatedUserWithFavorites = await User.findById(userId).populate({
-			path: 'favorites',
-		});
+		const updatedUser = await User.findById(userId).populate([
+			{ path: 'favorites' },
+			{ path: 'bookmarks' },
+		]);
 
 		return res.status(200).json({
-			updatedUser: updatedUserWithFavorites,
-			message: 'Favorites updated successfully',
+			updatedUser: updatedUser,
+			message: 'Bookmark updated successfully',
 		});
 	} catch (error) {
-		console.error('Error in toggleFavorite:', error);
+		console.error('Error in toggleBookmark:', error);
 		return res.status(500).json({ message: 'Internal server error', error });
 	}
 };
 
-export { toggleFavorite };
+export { toggleBookmark };

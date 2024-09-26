@@ -8,6 +8,7 @@ const NearbyResults: React.FC = () => {
 	const places = useAppSelector((state) => state.places.places);
 	const isLoadingNearby = useAppSelector((state) => state.places.status);
 	const favorites = useAppSelector((state) => state.user.favorites);
+	const bookmarks = useAppSelector((state) => state.user.bookmarks);
 
 	const navigate = useNavigate();
 
@@ -25,11 +26,16 @@ const NearbyResults: React.FC = () => {
 							const isFavorited = favorites.some(
 								(favorite) => favorite.googlePlaceId === place.id
 							);
+
+							const isBookmarked = bookmarks.some(
+								(bookmark) => bookmark.googlePlaceId === place.id
+							);
 							return (
 								<RestaurantSearchCard
 									key={place.id}
 									place={place}
 									isFavorited={isFavorited}
+									isBookmarked={isBookmarked}
 									onClick={() => restaurantCardClick(place)}
 								/>
 							);

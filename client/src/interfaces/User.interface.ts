@@ -1,3 +1,4 @@
+import Bookmark from './Bookmarks.interface';
 import Favorite from './Favorites.interface';
 
 interface User {
@@ -6,6 +7,7 @@ interface User {
 	email: string;
 	displayName: string;
 	favorites: Favorite[];
+	bookmarks: Bookmark[];
 }
 
 export default User;

@@ -8,6 +8,7 @@ const SearchResults: React.FC = () => {
 	const isLoadingSearch = useAppSelector((state) => state.search.status);
 	const searchResults = useAppSelector((state) => state.search.places);
 	const favorites = useAppSelector((state) => state.user.favorites);
+	const bookmarks = useAppSelector((state) => state.user.bookmarks);
 	const navigate = useNavigate();
 
 	const restaurantCardClick = (place: Place) => {
@@ -24,11 +25,16 @@ const SearchResults: React.FC = () => {
 							const isFavorited = favorites.some(
 								(favorite) => favorite.googlePlaceId === place.id
 							);
+
+							const isBookmarked = bookmarks.some(
+								(bookmark) => bookmark.googlePlaceId === place.id
+							);
 							return (
 								<RestaurantSearchCard
 									key={place.id}
 									place={place}
 									isFavorited={isFavorited}
+									isBookmarked={isBookmarked}
 									onClick={() => restaurantCardClick(place)}
 								/>
 							);
