@@ -3,46 +3,43 @@ import { removeCountryAndZip } from '../../helpers/removeCountryAndZip';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
 	faBookmark as faBookmarkSolid,
-	faStar as faStarSolid,
+	faHeart as faHeartSolid,
 	faCheckCircle as faCheckCircleSolid,
 } from '@fortawesome/free-solid-svg-icons';
 import {
-	faStar,
+	faHeart,
 	faBookmark,
 	faCheckCircle,
 } from '@fortawesome/free-regular-svg-icons';
 import { toggleFavorite } from '../../helpers/toggleFavorites';
 import { useAppDispatch } from '../../app/hooks';
+import { Place } from '../../interfaces/Place.interfaces';
 
 interface RestaurantSearchCardProps {
-	name: string;
-	address: string;
-	restaurantId: string;
+	place: Place;
 	isFavorited: boolean;
 	onClick: () => void;
 }
 
 const RestaurantSearchCard: React.FC<RestaurantSearchCardProps> = ({
-	name,
-	address,
-	restaurantId,
+	place,
 	isFavorited,
 	onClick,
 }) => {
 	const dispatch = useAppDispatch();
 
 	const handleToggleFavorite = (e: any) => {
-		toggleFavorite(e, restaurantId, dispatch);
+		toggleFavorite(e, place, dispatch);
 	};
 	return (
 		<div className={styles['restaurant-card']} onClick={onClick}>
 			<div className={styles['restaurant-info']}>
-				<h3>{name}</h3>
-				<p>{removeCountryAndZip(address)}</p>
+				<h3>{place.displayName.text}</h3>
+				<p>{removeCountryAndZip(place.formattedAddress)}</p>
 			</div>
 			<div className={styles.icons}>
 				<FontAwesomeIcon
-					icon={isFavorited ? faStarSolid : faStar}
+					icon={isFavorited ? faHeartSolid : faHeart}
 					className={styles.icon}
 					onClick={handleToggleFavorite}
 				/>
