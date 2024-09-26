@@ -28,9 +28,7 @@ const NearbyResults: React.FC = () => {
 							return (
 								<RestaurantSearchCard
 									key={place.id}
-									name={place.displayName.text}
-									address={place.formattedAddress}
-									restaurantId={place.id}
+									place={place}
 									isFavorited={isFavorited}
 									onClick={() => restaurantCardClick(place)}
 								/>
