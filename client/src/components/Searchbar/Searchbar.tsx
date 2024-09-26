@@ -1,6 +1,6 @@
 import LocationSearch from '../LocationSearch/LocationSearch';
 import styles from './Searchbar.module.scss';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import searchRestaurant from '../../helpers/searchRestaurant';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import {
@@ -17,7 +17,21 @@ const Searchbar: React.FC = () => {
 	const [locationMatch, setLocationMatch] = useState<boolean>(false);
 	const [clearLocationInput, setClearLocationInput] = useState<boolean>(false);
 	const isLoadingSearch = useAppSelector((state) => state.search.status);
+	const restaurantSearchState = useAppSelector(
+		(state) => state.search.restaurant
+	);
+	const locationSearchState = useAppSelector((state) => state.search.location);
 	const dispatch = useAppDispatch();
+
+	useEffect(() => {
+		if (restaurantSearchState !== '') {
+			setRestaurant(restaurantSearchState);
+		}
+
+		if (locationSearchState !== '') {
+			setLocation(locationSearchState);
+		}
+	}, []);
 
 	const searchRestaurants = async (search: string) => {
 		dispatch(fetchRestaurantsStart());
@@ -32,7 +46,7 @@ const Searchbar: React.FC = () => {
 
 	const clickSearch = async (e: any, search: string) => {
 		e.preventDefault();
-		dispatch(setSearch({ location, restaurant }));
+		dispatch(setSearch({ restaurant, location }));
 		searchRestaurants(search);
 	};
 
