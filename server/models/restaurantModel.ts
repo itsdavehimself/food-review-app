@@ -3,6 +3,9 @@ import RestaurantDocument from '../documents/restaurantDocument';
 
 const restaurantSchema = new mongoose.Schema({
 	googlePlaceId: { type: String, required: true, unique: true },
+	name: { type: String, required: true, unique: false },
+	address: { type: String, required: true, unique: false },
+	photoUrl: { type: String, required: true, unique: true },
 	reviews: [{ type: Schema.Types.ObjectId, ref: 'Review' }],
 	createdAt: { type: Date, default: Date.now },
 });
