@@ -1,6 +1,7 @@
 import { useAppSelector, useAppDispatch } from '../../app/hooks';
 import Cookies from 'js-cookie';
 import { logout } from '../../app/slices/userSlice';
+import { clearSearch } from '../../app/slices/searchSlice';
 
 const Dashboard: React.FC = () => {
 	const state = useAppSelector((state) => state.user);
@@ -15,6 +16,7 @@ const Dashboard: React.FC = () => {
 			credentials: 'include',
 		});
 		dispatch(logout());
+		dispatch(clearSearch());
 		Cookies.remove('accessToken');
 	};
 
