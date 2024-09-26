@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useAppSelector } from '../../app/hooks';
 import getPlaceDetails from '../../helpers/getPlaceDetails';
 import { Place } from '../../interfaces/Place.interfaces';
+import getPhoto from '../../helpers/getPhoto';
 
 const Restaurant: React.FC = () => {
 	const location = useLocation();
@@ -12,6 +13,7 @@ const Restaurant: React.FC = () => {
 	const id = location.pathname.split('/').pop();
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const [place, setPlace] = useState<Place | null>(null);
+	const [photoUrl, setPhotoUrl] = useState<string | undefined>('');
 
 	useEffect(() => {
 		if (!id) {
@@ -23,7 +25,6 @@ const Restaurant: React.FC = () => {
 
 		if (placeExistsInState) {
 			setPlace(placeExistsInState);
-			setIsLoading(false);
 		} else {
 			const fetchRestaurantData = async () => {
 				try {
@@ -40,6 +41,22 @@ const Restaurant: React.FC = () => {
 		}
 	}, [id, places]);
 
+	useEffect(() => {
+		if (place) {
+			const fetchPhoto = async () => {
+				try {
+					const photoUrl = await getPhoto(place.photos[0].name);
+					setPhotoUrl(photoUrl);
+					setIsLoading(false);
+				} catch (error) {
+					console.error('Error fetching photo:', error);
+				}
+			};
+
+			fetchPhoto();
+		}
+	}, [place]);
+
 	return (
 		<>
 			{isLoading ? (
@@ -49,6 +66,7 @@ const Restaurant: React.FC = () => {
 					<div className={styles['restaurant-container']}>
 						<h2>{place?.displayName.text}</h2>
 						<p>{place && removeCountryAndZip(place.formattedAddress)}</p>
+						<img src={photoUrl}></img>
 					</div>
 				</>
 			)}
