@@ -1,7 +1,8 @@
 import Cookies from 'js-cookie';
 import { updateFavorites } from '../app/slices/userSlice';
+import { Place } from '../interfaces/Place.interfaces';
 
-const toggleFavorite = async (e: any, restaurantId: string, dispatch: any) => {
+const toggleFavorite = async (e: any, place: Place, dispatch: any) => {
 	e.stopPropagation();
 
 	try {
@@ -19,7 +20,7 @@ const toggleFavorite = async (e: any, restaurantId: string, dispatch: any) => {
 					'Content-Type': 'application/json',
 					Authorization: `Bearer ${accessToken}`,
 				},
-				body: JSON.stringify({ restaurantId }),
+				body: JSON.stringify({ place }),
 			}
 		);
 

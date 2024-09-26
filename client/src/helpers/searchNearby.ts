@@ -1,5 +1,3 @@
-import { Place } from '../interfaces/Place.interfaces';
-
 async function searchNearby(latitude: number, longitude: number) {
 	const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
 
