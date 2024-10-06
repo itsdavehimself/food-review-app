@@ -26,13 +26,43 @@ const userSchema = new Schema<UserDocument>({
 		type: String,
 		trim: true,
 	},
-	favorites: {
-		type: [Schema.Types.ObjectId],
-		ref: 'Restaurant',
+	favorites: [
+		{
+			type: Schema.Types.ObjectId,
+			ref: 'Restaurant',
+		},
+	],
+	bookmarks: [
+		{
+			type: Schema.Types.ObjectId,
+			ref: 'Restaurant',
+		},
+	],
+	reviews: [{ type: Schema.Types.ObjectId, ref: 'Review' }],
+	preferences: {
+		value: {
+			type: Number,
+			required: true,
+			unique: false,
+			default: 5,
+		},
+		ambiance: {
+			type: Number,
+			required: true,
+			unique: false,
+			default: 5,
+		},
+		service: {
+			type: Number,
+			required: true,
+			unique: false,
+			default: 5,
+		},
 	},
-	bookmarks: {
-		type: [Schema.Types.ObjectId],
-		ref: 'Restaurant',
+	userPreferencesSet: {
+		type: Boolean,
+		default: false,
+		required: true,
 	},
 });
 
