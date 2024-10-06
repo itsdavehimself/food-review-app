@@ -7,6 +7,8 @@ import userAuthRouter from './routes/userAuthRoutes';
 import favoritesRouter from './routes/favoritesRoutes';
 import bookmarksRouter from './routes/bookmarksRoutes';
 import userSavedDataRouter from './routes/userSavedDataRoutes';
+import reviewRouter from './routes/reviewRoutes';
+
 const port = Number(process.env.PORT) || 3000;
 
 dotenv.config();
@@ -25,6 +27,7 @@ app.use(cookieParser());
 app.use('/api/auth', userAuthRouter);
 app.use('/api/favorites', favoritesRouter);
 app.use('/api/bookmarks', bookmarksRouter);
+app.use('/api/reviews', reviewRouter);
 app.use('/api/savedData', userSavedDataRouter);
 
 const mongoURI = process.env.MONGO_URI;
