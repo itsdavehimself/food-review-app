@@ -2,6 +2,8 @@ import Cookies from 'js-cookie';
 import { updateBookmarks } from '../app/slices/userSlice';
 import { Place } from '../interfaces/Place.interfaces';
 
+const serverUrl = import.meta.env.VITE_SERVER_URL;
+
 const toggleBookmark = async (e: any, place: Place, dispatch: any) => {
 	e.stopPropagation();
 
@@ -12,17 +14,14 @@ const toggleBookmark = async (e: any, place: Place, dispatch: any) => {
 			throw new Error('No access token found. User is not authenticated.');
 		}
 
-		const response = await fetch(
-			'http://localhost:3000/api/bookmarks/toggleBookmark',
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${accessToken}`,
-				},
-				body: JSON.stringify({ place }),
-			}
-		);
+		const response = await fetch(`${serverUrl}/api/bookmarks/toggleBookmark`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${accessToken}`,
+			},
+			body: JSON.stringify({ place }),
+		});
 
 		if (!response.ok) {
 			throw new Error(`Failed to toggle bookmark: ${response.statusText}`);
