@@ -8,6 +8,13 @@ interface UserDocument {
 	username: string;
 	favorites: Types.ObjectId[];
 	bookmarks: Types.ObjectId[];
+	reviews: Types.ObjectId[];
+	preferences: {
+		value: number;
+		ambiance: number;
+		service: number;
+	};
+	userPreferencesSet: boolean;
 }
 
 export default UserDocument;
