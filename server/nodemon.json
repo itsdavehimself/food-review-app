@@ -1,5 +1,14 @@
 {
-  "watch": ["./"],
-  "ext": "js",
-  "exec": "node server.js"
+	"watch": ["dist"],
+	"ext": "js",
+	"exec": "node dist/server.js",
+	"ignore": [
+		"node_modules",
+		"dist",
+		"build",
+		".git",
+		"logs",
+		"tmp",
+		"*.test.js"
+	]
 }
