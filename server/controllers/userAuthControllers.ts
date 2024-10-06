@@ -48,9 +48,8 @@ const setCookie = (res: Response, refreshToken: string) => {
 	res.cookie('jwt', refreshToken, {
 		httpOnly: true,
 		secure: process.env.NODE_ENV === 'production',
-		sameSite: 'none',
+		sameSite: 'lax',
 		maxAge: 7 * 24 * 60 * 60 * 1000,
-		path: '/',
 	});
 };
 
@@ -76,7 +75,6 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
 				.json({ message: 'Email or password is incorrect' });
 		}
 
-		// Generate tokens (access and refresh)
 		const { accessToken, refreshToken } = generateTokens(
 			user.email,
 			user.username,
@@ -84,22 +82,24 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
 			user._id
 		);
 
-		// Set the refresh token in a cookie
 		setCookie(res, refreshToken);
 
-		const userWithPopulatedFavorites = await User.findById(user._id).populate({
-			path: 'favorites',
-			select: 'googlePlaceId',
-		});
+		const updatedUser = await User.findById(user._id).populate([
+			'favorites',
+			'bookmarks',
+		]);
 
-		if (!userWithPopulatedFavorites) {
+		if (!updatedUser) {
 			return res
 				.status(404)
 				.json({ message: 'User not found after population' });
 		}
 		return res.status(200).json({
 			accessToken,
-			favorites: userWithPopulatedFavorites.favorites,
+			favorites: updatedUser.favorites,
+			bookmarks: updatedUser.bookmarks,
+			preferences: updatedUser.preferences,
+			userPreferencesSet: updatedUser.userPreferencesSet,
 		});
 	} catch (error) {
 		console.error(error);
@@ -202,14 +202,17 @@ const refresh = (req: Request, res: Response) => {
 	);
 };
 
-const logoutUser = async (req: Request, res: Response): Promise<void> => {
+const logoutUser = async (
+	req: Request,
+	res: Response
+): Promise<Response | void> => {
 	const cookies = req.cookies;
 	if (!cookies?.jwt) {
-		res.sendStatus(204);
+		return res.sendStatus(204);
 	}
 
 	res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true });
-	res.json({ message: 'Cookie cleared' });
+	return res.json({ message: 'Cookie cleared' });
 };
 
 export { loginUser, checkEmail, signUpUser, refresh, logoutUser };

@@ -24,9 +24,13 @@ const getUserSavedData = async (req: UserRequest, res: Response) => {
 			return res.status(404).json({ message: 'User not found' });
 		}
 
-		return res
-			.status(200)
-			.json({ favorites: user.favorites, bookmarks: user.bookmarks });
+		return res.status(200).json({
+			favorites: user.favorites,
+			bookmarks: user.bookmarks,
+			reviews: user.reviews,
+			preferences: user.preferences,
+			userPreferencesSet: user.userPreferencesSet,
+		});
 	} catch (error) {
 		return res.status(500).json({ message: 'Internal server error' });
 	}
