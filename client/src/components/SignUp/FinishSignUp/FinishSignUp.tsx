@@ -2,9 +2,11 @@ import styles from './FinishSignUp.module.scss';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import Cookies from 'js-cookie';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
-import { login } from '../../../app/slices/userSlice';
+import { signup } from '../../../app/slices/userSlice';
 import { useAppDispatch } from '../../../app/hooks';
 import { useNavigate } from 'react-router-dom';
+
+const serverUrl = import.meta.env.VITE_SERVER_URL;
 
 interface FinishSignUpProps {
 	email: string;
@@ -38,17 +40,14 @@ const FinishSignUp: React.FC<FinishSignUpProps> = ({ email }) => {
 	const onSubmit: SubmitHandler<FormValues> = async (data) => {
 		const { password, username, displayName } = data;
 
-		const signUpResponse = await fetch(
-			`http://localhost:3000/api/auth/signup`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ email, password, username, displayName }),
-				credentials: 'include',
-			}
-		);
+		const signUpResponse = await fetch(`${serverUrl}/api/auth/signup`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ email, password, username, displayName }),
+			credentials: 'include',
+		});
 
 		const signUpData = await signUpResponse.json();
 		const accessToken = signUpData.accessToken;
@@ -56,8 +55,12 @@ const FinishSignUp: React.FC<FinishSignUpProps> = ({ email }) => {
 
 		if (accessToken) {
 			const decodedToken = jwtDecode(accessToken) as UserInfoPayload;
-			dispatch(login(decodedToken.UserInfo));
-			navigate('/dashboard');
+			dispatch(
+				signup({
+					...decodedToken.UserInfo,
+				})
+			);
+			navigate('/preferences');
 		} else {
 			throw new Error('No access tokens found');
 		}

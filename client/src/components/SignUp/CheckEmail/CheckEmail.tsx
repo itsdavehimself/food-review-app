@@ -1,6 +1,8 @@
 import styles from './CheckEmail.module.scss';
 import { useForm, SubmitHandler } from 'react-hook-form';
 
+const serverUrl = import.meta.env.VITE_SERVER_URL;
+
 interface CheckEmailProps {
 	setEmail: React.Dispatch<React.SetStateAction<string>>;
 }
@@ -18,7 +20,7 @@ const CheckEmail: React.FC<CheckEmailProps> = ({ setEmail }) => {
 
 	const onSubmit: SubmitHandler<FormValues> = async (data) => {
 		const { email } = data;
-		const emailResponse = await fetch(`http://localhost:3000/api/auth/email`, {
+		const emailResponse = await fetch(`${serverUrl}/api/auth/email`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
