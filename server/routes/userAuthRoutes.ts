@@ -19,7 +19,7 @@ userAuthRouter.post('/email', checkEmail);
 userAuthRouter.post('/signup', signUpUser);
 
 // Refresh
-userAuthRouter.get('/refresh', refresh);
+userAuthRouter.post('/refresh', refresh);
 
 // Logout Route
 userAuthRouter.post('/logout', logoutUser);
