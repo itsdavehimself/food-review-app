@@ -3,16 +3,59 @@ import { jwtDecode } from 'jwt-decode';
 import { UserInfoPayload } from '../components/Login/Login';
 import { login, logout } from '../app/slices/userSlice';
 
+const serverUrl = import.meta.env.VITE_SERVER_URL;
+
+let refreshTimeout: NodeJS.Timeout | null = null;
+
+const scheduleTokenRefresh = (decodedToken: UserInfoPayload, dispatch: any) => {
+	const currentTime = Date.now() / 1000;
+
+	if (!decodedToken.exp) {
+		throw new Error('No token expiration time set');
+	}
+
+	const timeUntilExpiration = decodedToken.exp - currentTime;
+	const timeUntilRefresh = (timeUntilExpiration - 5 * 60) * 1000;
+
+	if (timeUntilRefresh > 0) {
+		refreshTimeout = setTimeout(async () => {
+			const newToken = await refreshAccessToken();
+			if (newToken) {
+				await handleToken(newToken, dispatch);
+			} else {
+				console.error('Failed to refresh token');
+				dispatch(logout());
+			}
+		}, timeUntilRefresh);
+	} else {
+		dispatch(logout());
+	}
+};
+
 const handleToken = async (token: string | undefined, dispatch: any) => {
 	try {
-		if (!token) throw new Error('No token provided');
+		if (!token) {
+			throw new Error('No token provided');
+		}
 
-		// Decode the token to get basic user info
 		const decodedToken = jwtDecode<UserInfoPayload>(token);
 
-		// Fetch the user's favorites from the backend (or use the existing API)
+		const currentTime = Date.now() / 1000;
+		if (decodedToken.exp && decodedToken.exp < currentTime) {
+			const newToken = await refreshAccessToken();
+			if (newToken) {
+				await handleToken(newToken, dispatch);
+				return;
+			} else {
+				throw new Error('Failed to refresh token');
+			}
+		}
+
+		scheduleTokenRefresh(decodedToken, dispatch);
+
+		// Fetch user data after verifying token
 		const response = await fetch(
-			'http://localhost:3000/api/savedData/getUserSavedData',
+			`${serverUrl}/api/savedData/getUserSavedData`,
 			{
 				method: 'GET',
 				headers: {
@@ -21,43 +64,30 @@ const handleToken = async (token: string | undefined, dispatch: any) => {
 			}
 		);
 
+		if (!response.ok) {
+			throw new Error(`Failed to fetch user data: ${response.statusText}`);
+		}
+
 		const data = await response.json();
 
-		// Dispatch login with the full user info, including favorites
 		dispatch(
 			login({
 				...decodedToken.UserInfo,
 				favorites: data.favorites || [],
 				bookmarks: data.bookmarks || [],
+				reviews: [],
+				preferences: data.preferences || { value: 5, ambiance: 5, service: 5 },
+				userPreferencesSet: data.userPreferencesSet || false,
 			})
 		);
 	} catch (error: any) {
-		const newToken = await refreshAccessToken();
+		console.error('Error in handleToken:', error.message);
 
-		if (newToken) {
-			const newDecodedToken = jwtDecode<UserInfoPayload>(newToken);
-
-			// Fetch the favorites again if token was refreshed
-			const response = await fetch('http://localhost:3000/api/user/favorites', {
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${newToken}`,
-				},
-			});
-
-			const data = await response.json();
-
-			// Dispatch login with the full user info and favorites
-			dispatch(
-				login({
-					...newDecodedToken.UserInfo,
-					favorites: data.favorites || [],
-					bookmarks: data.bookmarks || [],
-				})
-			);
-		} else {
-			dispatch(logout());
+		if (refreshTimeout) {
+			clearTimeout(refreshTimeout);
 		}
+
+		dispatch(logout());
 	}
 };
 
