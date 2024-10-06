@@ -49,7 +49,6 @@ const toggleBookmark = async (req: UserRequest, res: Response) => {
 		await user.save();
 
 		const updatedUser = await User.findById(userId).populate([
-			{ path: 'favorites' },
 			{ path: 'bookmarks' },
 		]);
 
