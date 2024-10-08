@@ -2,7 +2,6 @@ import styles from './Navbar.module.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
 	faHouse,
-	faLocationDot,
 	faUser,
 	faMagnifyingGlass,
 } from '@fortawesome/free-solid-svg-icons';
@@ -12,7 +11,6 @@ import { useAppSelector } from '../../app/hooks';
 const Navbar: React.FC = () => {
 	const navigate = useNavigate();
 	const houseIcon = <FontAwesomeIcon icon={faHouse} />;
-	const mapIcon = <FontAwesomeIcon icon={faLocationDot} />;
 	const userIcon = <FontAwesomeIcon icon={faUser} />;
 	const searchIcon = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 	const user = useAppSelector((state) => state.user);
