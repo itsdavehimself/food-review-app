@@ -7,6 +7,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Cookies from 'js-cookie';
 import { logout } from './app/slices/userSlice';
 import handleToken from './helpers/handleToken';
+import refreshAccessToken from './helpers/refreshAccessToken';
 import Login from './components/Login/Login';
 import WithoutNav from './containers/WithoutNav/WithoutNav';
 import WithNav from './containers/WithNav/WithNav';
@@ -67,6 +68,19 @@ function App() {
 	useEffect(() => {
 		initializeApp();
 	}, [initializeApp]);
+
+	useEffect(() => {
+		const checkSession = async () => {
+			const refreshedToken = await refreshAccessToken();
+			if (refreshedToken) {
+				await handleToken(refreshedToken, dispatch);
+			} else {
+				dispatch(logout());
+			}
+		};
+
+		checkSession();
+	}, [dispatch]);
 
 	useEffect(() => {
 		if (location.latitude !== -1 && location.longitude !== -1) {
