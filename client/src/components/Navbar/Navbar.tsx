@@ -29,12 +29,6 @@ const Navbar: React.FC = () => {
 				</button>
 				<button
 					className={styles['nav-btn']}
-					onClick={() => handleClick('map')}
-				>
-					{mapIcon}
-				</button>
-				<button
-					className={styles['nav-btn']}
 					onClick={() => handleClick('explore')}
 				>
 					{searchIcon}

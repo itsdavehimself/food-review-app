@@ -11,7 +11,6 @@ import refreshAccessToken from './helpers/refreshAccessToken';
 import Login from './components/Login/Login';
 import WithoutNav from './containers/WithoutNav/WithoutNav';
 import WithNav from './containers/WithNav/WithNav';
-import Map from './containers/Map/Map';
 import Explore from './containers/Explore/Explore';
 import Profile from './containers/Profile/Profile';
 import searchNearby from './helpers/searchNearby';
@@ -140,20 +139,6 @@ function App() {
 								path="/preferences"
 								element={
 									user.username ? <Preferences /> : <Navigate to="/login" />
-								}
-							/>
-							<Route
-								path="/map"
-								element={
-									user.username ? (
-										user.userPreferencesSet ? (
-											<Map />
-										) : (
-											<Navigate to="/preferences" />
-										)
-									) : (
-										<Navigate to="/login" />
-									)
 								}
 							/>
 							<Route
